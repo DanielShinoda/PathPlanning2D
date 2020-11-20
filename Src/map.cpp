@@ -311,8 +311,6 @@ bool Map::getMap(const char *FileName)
     return true;
 }
 
-
-
 int Map::getValue(int i, int j) const
 {
     if (i < 0 || i >= height)
@@ -326,15 +324,35 @@ int Map::getValue(int i, int j) const
 
 int Map::getMapHeight() const
 {
-      return height;
+    return height;
 }
 
 int Map::getMapWidth() const
 {
-      return width;
+    return width;
 }
 
 double Map::getCellSize() const
 {
-      return cellSize;
+    return cellSize;
+}
+
+int Map::getStartI() const
+{
+    return start_i;
+}
+
+int Map::getStartJ() const
+{
+    return start_j;
+}
+
+int Map::getGoalI() const
+{
+    return goal_i;
+}
+
+int Map::getGoalJ() const
+{
+    return goal_j;
 }
