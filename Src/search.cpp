@@ -5,13 +5,13 @@
 
 Search::Search()
 {
-//set defaults here
+    //set defaults here
 }
 
 Search::~Search() {}
 
 
-SearchResult Search::startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options)
+SearchResult Search::startSearch(ILogger* Logger, const Map& map, const EnvironmentOptions& options)
 {
     std::chrono::time_point<std::chrono::system_clock> start, finish;
     start = std::chrono::system_clock::now();
@@ -22,14 +22,15 @@ SearchResult Search::startSearch(ILogger *Logger, const Map &map, const Environm
     currNode.j = map.getStartJ();
     currNode.g = 0.0;
     currNode.H = computeHeuristic(currNode.i, currNode.j, map.getGoalI(), map.getGoalJ(), options);
-    Open.insert({currNode.i + (currNode.j * map.getMapHeight()), currNode});
+    Open[currNode.i + (currNode.j * map.getMapHeight())] = currNode;
+    currNode.F = currNode.g + (options.hweight * currNode.H);
 
     bool pathFound = false;
-    
+
     while (!Open.empty()) {
         currNode = findMin(options);
 
-        Close.insert({ currNode.i + (currNode.j * map.getMapHeight()), currNode });
+        Close[currNode.i + (currNode.j * map.getMapHeight())] = currNode;
         Open.erase(currNode.i + (currNode.j * map.getMapHeight()));
 
         if (currNode.i == map.getGoalI() && currNode.j == map.getGoalJ()) {
@@ -48,7 +49,7 @@ SearchResult Search::startSearch(ILogger *Logger, const Map &map, const Environm
                 iter->parent = &(Close.find(currNode.i + (currNode.j * map.getMapHeight()))->second);
                 *iter = changeParent(*iter, *(iter->parent), map, options);
                 Open.erase(iter->i + (iter->j * map.getMapHeight()));
-                Open.insert({ iter->i + (iter->j * map.getMapHeight()) }, *iter);
+                Open[iter->i + (iter->j * map.getMapHeight())] = *iter;
             }
         }
         Logger->writeToLogOpenClose(Open, Close, false);
