@@ -1,5 +1,5 @@
 #include "search.h"
-#include <list>
+
 
 Search::Search()
 {
@@ -36,14 +36,54 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
             break;
         }
 
+        std::unordered_map<int, Node> successors = getSuccessors(s, map, options);
+        //Here are some cases to not choose the node
+        //1) Node not in OPEN
+        //2) Node cost is inappropriate
+        for (auto iter = successors.begin(); iter != successors.end(); ++iter) {
+            if ((OPEN.find(iter->second.i * map.getMapWidth() + iter->second.j) == OPEN.end()) ||
+                (iter->second.F <= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].F) &&
+                (((options.breakingties) && (iter->second.g >= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].g)) ||
+                (!(options.breakingties) && (iter->second.g <= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].g)))) {
+
+                iter->second.parent = &CLOSED.find(s.i * map.getMapWidth() + s.j)->second;
+                iter->second = changeParent(iter->second, *iter->second.parent, map, options);
+                OPEN[iter->second.i * map.getMapWidth() + iter->second.j] = iter->second;
+            }
+        }
     }
-    /*sresult.pathfound = ;
-    sresult.nodescreated =  ;
-    sresult.numberofsteps = ;
-    sresult.time = ;
-    sresult.hppath = &hppath; //Here is a constant pointer
-    sresult.lppath = &lppath;*/
+    if (pathFound) {
+        sresult.pathlength = s.g;
+        makePrimaryPath(s);
+    }
+
+    finish = std::chrono::system_clock::now();
+    sresult.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count()) / 1000000000;
+
+    if (pathFound) makeSecondaryPath();
+
+    sresult.pathfound = pathFound;
+    sresult.nodescreated = CLOSED.size() + OPEN.size();
+    sresult.numberofsteps = CLOSED.size();
+
+    sresult.hppath = &hppath;
+    sresult.lppath = &lppath;
+
     return sresult;
+}
+
+double Search::getHeuristic(int x1, int y1, int x2, int y2, const EnvironmentOptions& options) {
+    double dx(abs(x1 - x2)), dy(abs(y1 - y2));
+
+    if (options.searchtype < 2) { return 0.0; }
+
+    if (options.metrictype == CN_SP_MT_DIAG) { return (std::min(dx, dy) * sqrt(2)) + abs(dx - dy); }
+
+    if (options.metrictype == CN_SP_MT_MANH) { return (dx + dy); }
+
+    if (options.metrictype == CN_SP_MT_EUCL) { return (sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))); }
+
+    if (options.metrictype == CN_SP_MT_CHEB) { return std::max(dx, dy); }
 }
 
 double Search::getHeuristic(int x1, int y1, const Map& map, const EnvironmentOptions& options) {
@@ -77,14 +117,14 @@ Node Search::argmin(const EnvironmentOptions& options) {
     return minNode;
 }
 
-std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentOptions& options) {
-    std::list<Node> successors;
+std::unordered_map<int, Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentOptions& options) {
+    std::unordered_map<int, Node> successors;
     Node successor;
     bool noWay;
     for (int down = -1; down < 2; ++down) {
         for (int right = -1; right < 2; ++right) {
             noWay = false;
-            if (right != 0 || down != 0) {
+            if (right && down) {
                 if (map.CellOnGrid(s.i + down, s.j + right) &&
                     map.CellIsTraversable(s.i + down, s.j + right)) {
                     if ((down != 0) && (right != 0)) {
@@ -101,26 +141,62 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
                 }
             }
             //If there is a way and node not in CLOSED
-            if ((!noWay) && (CLOSED.find((s.i + down) * map.getMapWidth + (s.j + right)) == CLOSED.end())) {
+            if ((!noWay) && (CLOSED.find((s.i + down) * map.getMapWidth() + (s.j + right)) == CLOSED.end())) {
                 successor.i = s.i + down;
                 successor.j = s.j + right;
                 if (down != 0 && right != 0) successor.g = s.g + 1;
                 else successor.g = s.g + sqrt(2);
                 successor.H = getHeuristic(successor.i, successor.j, map, options);
                 successor.F = successor.g + successor.H;
-                successors.push_back(successor);
+                successors.insert({successor.i * map.getMapWidth() + successor.j, successor});
             }
         }
     }
     return successors;
 }
 
-/*void Search::makePrimaryPath(Node curNode)
-{
-    //need to implement
-}*/
+Node Search::changeParent(Node c, Node p, const Map& map, const EnvironmentOptions& options) {
+    if (options.searchtype != CN_SP_ST_TH) return c;
 
-/*void Search::makeSecondaryPath()
+    if ((p.parent == nullptr) || ((c.i == p.parent->i) && (c.j == p.parent->j))) return c;
+
+    c.g = p.parent->g + getHeuristic(c.i, c.j, p.i, p.j, options);
+    c.F = c.g + (options.hweight * c.H);
+    c.parent = p.parent;
+    return c;
+}
+
+void Search::makePrimaryPath(Node currentNode) {
+    Node thisNode = currentNode;
+
+    while (thisNode.parent) {
+        lppath.push_front(thisNode);
+        thisNode = *(thisNode.parent);
+    }
+    lppath.push_front(thisNode);
+}
+
+void Search::makeSecondaryPath()
 {
-    //need to implement
-}*/
+    auto it = lppath.begin();
+    int currentNode_i, currentNode_j, nextNode_i, nextNode_j;
+    hppath.push_back(*it);
+
+    while (it != --lppath.end()) {
+        currentNode_i = it->i;
+        currentNode_j = it->j;
+
+        ++it;
+        nextNode_i = it->i;
+        nextNode_j = it->j;
+
+        ++it;
+
+        if (((it->i - nextNode_i) != (nextNode_i - currentNode_i)) || ((it->j - nextNode_j) != (nextNode_j - currentNode_j))) {
+            hppath.push_back(*(--it));
+        }
+        else {
+            --it;
+        }
+    }
+}
