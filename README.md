@@ -139,3 +139,6 @@ PathPlanning.exe ../../Examples/example.xml
 ```
  ctest --output-on-failure
 ```
+## Контакы
+Хайбулин Даниэль
+- telegram.me/kiDaniel
