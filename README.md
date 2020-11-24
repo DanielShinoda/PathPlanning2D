@@ -44,36 +44,6 @@ git clone https://github.com/*account*/PathPlanningProject.git
 Сборку проекта возможно осуществить двумя способами:
 - Используя QtCreator и qmake;
 - Используя CMake.
-  
-При использовании QtCreator требуется открыть файл `ASearch.pro` который находится в директории `.../PathPlanningProject/Src/` и настроить проект с нужным комплектом сборки.
-
-![qt_open](./Images/qt1.png)
-
-После выбора проекта требуется установить имя входного файла как аргумент командной строки. В качестве первого примера используйте файл `.../PathPlanningProject/Examples/example.xml`. Для установки аргументов командной строки перейдите в настройки запуска проекта и введите нужный путь к файлу в поле "Параметры командной строки".
-
-![qt_arg](./Images/qt2.png)
-
-После установки аргумента командной строки можно проверить работу программы. Следующий результат должен отобразиться в результате запуска:
-
-```
-Parsing the map from XML:
-Map OK!
-Parsing configurations (algorithm, log) from XML:
-short
-Warning! Value of 'logpath' tag is missing!
-Value of 'logpath' tag was defined to 'current directory'.
-Warning! Value of 'logfilename' tag is missing.
-Value of 'logfilename' tag was defined to default (original filename +'_log' + original file extension.
-Configurations OK!
-Creating log channel:
-Log OK!
-Start searching the path:
-Search is finished!
-Path NOT found!
-numberofsteps=0
-nodescreated=0
-time=0
-Results are saved (if chosen) via created log channel.
 ```
 
 При использовании CMake сборка и запуск может производиться как из командной строки, так и при помощи различных IDE (например JetBrains CLion). Ниже приведены скрипты сборки и запуска с использованием командной строки.
