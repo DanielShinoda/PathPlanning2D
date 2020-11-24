@@ -141,4 +141,4 @@ PathPlanning.exe ../../Examples/example.xml
 ```
 ## Контакы
 Хайбулин Даниэль
-- t.me/kiDaniel
+- https://t.me/kiDaniel
