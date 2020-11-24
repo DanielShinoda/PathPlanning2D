@@ -128,7 +128,78 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
 }
 
 void XmlLogger::writeToLogOpenClose(const std::unordered_map<int, Node>& open, const std::unordered_map<int, Node>& close, bool last) {
-    //To be implemented
+    if (loglevel != CN_LP_LEVEL_FULL_WORD && !(loglevel == CN_LP_LEVEL_MEDIUM_WORD && last)) {
+        return;
+    }
+    XMLElement* nextElem = nullptr;
+    XMLElement* elem = doc.NewElement(CNS_TAG_STEP);
+    XMLElement* lowlevel = doc.FirstChildElement(CNS_TAG_ROOT);
+    lowlevel = lowlevel->FirstChildElement(CNS_TAG_LOG)->FirstChildElement(CNS_TAG_LOWLEVEL);
+    int now = 0;
+    for (nextElem = lowlevel->FirstChildElement(); nextElem != nullptr; nextElem = nextElem->NextSiblingElement()) {
+        now++;
+    }
+    elem->SetAttribute(CNS_TAG_ATTR_NUM, now);
+    lowlevel->InsertEndChild(elem);
+    lowlevel = lowlevel->LastChildElement();
+    lowlevel->InsertEndChild(doc.NewElement(CNS_TAG_OPEN));
+    nextElem = lowlevel->LastChildElement();
+    Node minNode;
+    minNode.F = -1;
+    int ind_min = 0;
+    for (auto it = open.begin(); it != open.end(); ++it) {
+        if (it->second.F <= minNode.F || minNode.F == -1) {
+            if (it->second.F == minNode.F && it->second.g > minNode.g) {
+                minNode = it->second;
+                ind_min = it->first;
+            }
+            else if (it->second.F < minNode.F || minNode.F == -1) {
+                minNode = it->second;
+                ind_min = it->first;
+            }
+        }
+    }
+    if (minNode.F != -1) {
+        elem = doc.NewElement(CNS_TAG_POINT);
+        elem->SetAttribute(CNS_TAG_ATTR_F, minNode.F);
+        elem->SetAttribute(CNS_TAG_ATTR_G, minNode.g);
+        elem->SetAttribute(CNS_TAG_ATTR_Y, minNode.i);
+        elem->SetAttribute(CNS_TAG_ATTR_X, minNode.j);
+        if (minNode.g > 0) {
+            elem->SetAttribute(CNS_TAG_ATTR_PARY, minNode.parent->i);
+            elem->SetAttribute(CNS_TAG_ATTR_PARX, minNode.parent->j);
+        }
+        nextElem->InsertEndChild(elem);
+    }
+    for (auto it = open.begin(); it != open.end(); ++it) {
+        if (it->first != ind_min) {
+            elem = doc.NewElement(CNS_TAG_POINT);
+            elem->SetAttribute(CNS_TAG_ATTR_F, it->second.F);
+            elem->SetAttribute(CNS_TAG_ATTR_G, it->second.g);
+            elem->SetAttribute(CNS_TAG_ATTR_Y, it->second.i);
+            elem->SetAttribute(CNS_TAG_ATTR_X, it->second.j);
+            if (it->second.g > 0) {
+                elem->SetAttribute(CNS_TAG_ATTR_PARY, it->second.parent->i);
+                elem->SetAttribute(CNS_TAG_ATTR_PARX, it->second.parent->j);
+            }
+            nextElem->InsertEndChild(elem);
+        }
+        nextElem->InsertEndChild(elem);
+    }
+    lowlevel->InsertEndChild(doc.NewElement(CNS_TAG_CLOSE));
+    nextElem = lowlevel->LastChildElement();
+    for (auto it = close.begin(); it != close.end(); ++it) {
+        elem = doc.NewElement(CNS_TAG_POINT);
+        elem->SetAttribute(CNS_TAG_ATTR_F, it->second.F);
+        elem->SetAttribute(CNS_TAG_ATTR_G, it->second.g);
+        elem->SetAttribute(CNS_TAG_ATTR_Y, it->second.i);
+        elem->SetAttribute(CNS_TAG_ATTR_X, it->second.j);
+        if (it->second.g > 0) {
+            elem->SetAttribute(CNS_TAG_ATTR_PARY, it->second.parent->i);
+            elem->SetAttribute(CNS_TAG_ATTR_PARX, it->second.parent->j);
+        }
+        nextElem->InsertEndChild(elem);
+    }
 }
 
 void XmlLogger::writeToLogPath(const std::list<Node>& path)

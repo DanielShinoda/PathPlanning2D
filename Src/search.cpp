@@ -47,11 +47,16 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
                 (!(options.breakingties) && (iter->second.g <= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].g)))) {
 
                 iter->second.parent = &CLOSED.find(s.i * map.getMapWidth() + s.j)->second;
-                iter->second = changeParent(iter->second, *iter->second.parent, map, options);
-                OPEN[iter->second.i * map.getMapWidth() + iter->second.j] = iter->second;
+                iter->second = changeParent(iter->second, *(iter->second.parent), map, options);
+                OPEN.erase(iter->second.i * map.getMapWidth() + iter->second.j);
+                OPEN.insert({ iter->second.i * map.getMapWidth() + iter->second.j , iter->second });
             }
         }
+
+        Logger->writeToLogOpenClose(OPEN, CLOSED, false);
+
     }
+    Logger->writeToLogOpenClose(OPEN, CLOSED, false);
 
     if (pathFound) {
         sresult.pathlength = s.g;
