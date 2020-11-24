@@ -108,7 +108,7 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
 
         for (int j = 0; j < map.getMapWidth(); ++j) {
             inPath = false;
-            for (std::list<Node>::const_iterator it = path.begin(); it != path.end(); it++)
+            for (auto it = path.begin(); it != path.end(); it++)
                 if (it->i == i && it->j == j) {
                     inPath = true;
                     break;
@@ -127,12 +127,9 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
     }
 }
 
-/*void XmlLogger::writeToLogOpenClose(const typename &open, const typename &close)
-{
-    //need to implement
-    if (loglevel != CN_LP_LEVEL_FULL_WORD  && !(loglevel == CN_LP_LEVEL_MEDIUM_WORD && last))
-        return;
-}*/
+void XmlLogger::writeToLogOpenClose(const std::unordered_map<int, Node>& open, const std::unordered_map<int, Node>& close, bool last) {
+    //To be implemented
+}
 
 void XmlLogger::writeToLogPath(const std::list<Node>& path)
 {
