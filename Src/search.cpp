@@ -36,20 +36,20 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
             break;
         }
 
-        std::unordered_map<int, Node> successors = getSuccessors(s, map, options);
+        std::list<Node> successors = getSuccessors(s, map, options);
         //Here are some cases to not choose the node
         //1) Node not in OPEN
         //2) Node cost is inappropriate
         for (auto iter = successors.begin(); iter != successors.end(); ++iter) {
-            if ((OPEN.find(iter->second.i * map.getMapWidth() + iter->second.j) == OPEN.end()) ||
-                (iter->second.F <= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].F) &&
-                (((options.breakingties) && (iter->second.g >= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].g)) ||
-                (!(options.breakingties) && (iter->second.g <= OPEN[iter->second.i * map.getMapWidth() + iter->second.j].g)))) {
+            if ((OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) ||
+                (iter->F <= OPEN[iter->i * map.getMapWidth() + iter->j].F) &&
+                (((options.breakingties) && (iter->g >= OPEN[iter->i * map.getMapWidth() + iter->j].g)) ||
+                (!(options.breakingties) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))) {
 
-                iter->second.parent = &CLOSED.find(s.i * map.getMapWidth() + s.j)->second;
-                iter->second = changeParent(iter->second, *(iter->second.parent), map, options);
-                OPEN.erase(iter->second.i * map.getMapWidth() + iter->second.j);
-                OPEN.insert({ iter->second.i * map.getMapWidth() + iter->second.j , iter->second });
+                iter->parent = &CLOSED.find(s.i * map.getMapWidth() + s.j)->second;
+                *iter = changeParent(*iter, *(iter->parent), map, options);
+                OPEN.erase(iter->i * map.getMapWidth() + iter->j);
+                OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
             }
         }
 
@@ -123,8 +123,8 @@ Node Search::argmin(const EnvironmentOptions& options) {
     return minNode;
 }
 
-std::unordered_map<int, Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentOptions& options) {
-    std::unordered_map<int, Node> successors;
+std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentOptions& options) {
+    std::list<Node> successors;
     Node successor;
     bool noWay;
     for (int down = -1; down < 2; ++down) {
@@ -150,11 +150,11 @@ std::unordered_map<int, Node> Search::getSuccessors(Node s, const Map& map, cons
             if ((!noWay) && (CLOSED.find((s.i + down) * map.getMapWidth() + (s.j + right)) == CLOSED.end())) {
                 successor.i = s.i + down;
                 successor.j = s.j + right;
-                if (down != 0 && right != 0) successor.g = s.g + 1;
-                else successor.g = s.g + sqrt(2);
+                if ((down != 0) && (right != 0)) successor.g = s.g + sqrt(2);
+                else successor.g = s.g + 1;
                 successor.H = getHeuristic(successor.i, successor.j, map, options);
-                successor.F = successor.g + successor.H;
-                successors.insert({successor.i * map.getMapWidth() + successor.j, successor});
+                successor.F = successor.g + successor.H * options.hweight;
+                successors.push_front(successor);
             }
         }
     }
