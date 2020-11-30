@@ -30,7 +30,6 @@ class Search
         virtual Node argmin(const EnvironmentOptions& options);
         virtual std::list<Node> getSuccessors(Node s, const Map& map, const EnvironmentOptions& options);
         virtual Node changeParent(Node currentNode, Node parentNode, const Map& map, const EnvironmentOptions& options);
-        virtual bool lineOfSight(int x1, int y1, int x2, int y2, const Map& map, const EnvironmentOptions& options);
         virtual void makePrimaryPath(Node currentNode);
         virtual void makeSecondaryPath();
         SearchResult sresult; //This will store the search result

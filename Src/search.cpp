@@ -135,7 +135,7 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
                     map.CellIsTraversable(s.i + down, s.j + right)) {
                     if ((down != 0) && (right != 0)) {
                         if ((map.CellIsObstacle(s.i + down, s.j) &&
-                            map.CellIsObstacle(s.i, s.j + right) && 
+                            map.CellIsObstacle(s.i, s.j + right) &&
                             !(options.allowsqueeze))) noWay = true;
                     }
 
@@ -161,94 +161,14 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
     return successors;
 }
 
-bool Search::lineOfSight(int x1, int y1, int x2, int y2, const Map& map, const EnvironmentOptions& options) {
-    int dx, dy, x_inc, y_inc, error, error0, n, x, y;
-
-    dx = abs(x2 - x1);
-    dy = abs(y2 - y1);
-    x_inc = (x2 > x1 ? 1 : -1);
-    y_inc = (y2 > y1 ? 1 : -1);
-    n = dx + dy;
-    error = dx - dy;
-    error0 = error;
-    x = x1;
-    y = y1;
-    dx *= 2;
-    dy *= 2;
-
-    if (dx == 0) {
-        for (; y != y2; y += y_inc) {
-            if (map.CellIsObstacle(x, y))
-                return false;
-        }
-        return true;
-    }
-    else if (dy == 0) {
-        for (; x != x2; x += x_inc) {
-            if (map.CellIsObstacle(x, y))
-                return false;
-        }
-        return true;
-    }
-
-    while (n > 0) {
-        if (map.CellIsObstacle(x, y)) {
-            return false;
-        }
-
-        if (error > 0) {
-            if ((!options.cutcorners) && ((error - dy) < error0)) {
-                if (map.CellIsObstacle(x, y + y_inc)) {
-                    return false;
-                }
-            }
-            x += x_inc;
-            error -= dy;
-
-        }
-        else if (error < 0) {
-            if ((!options.cutcorners) && ((error + dx) > error0)) {
-                if (map.CellIsObstacle(x + x_inc, y)) {
-                    return false;
-                }
-            }
-            y += y_inc;
-            error += dx;
-
-        }
-        else if (error == 0) {
-            if (map.CellIsTraversable(x + x_inc, y)) {
-                x += x_inc;
-                error -= dy;
-            }
-            else if (map.CellIsTraversable(x, y + y_inc)) {
-                y += y_inc;
-                error += dx;
-            }
-            else {
-                return false;
-            }
-        }
-        --n;
-    }
-
-    if (map.CellIsObstacle(x, y)) {
-        return false;
-    }
-
-    return true;
-}
-
 Node Search::changeParent(Node c, Node p, const Map& map, const EnvironmentOptions& options) {
     if (options.searchtype != CN_SP_ST_TH) return c;
 
     if ((p.parent == nullptr) || ((c.i == p.parent->i) && (c.j == p.parent->j))) return c;
 
-    if (lineOfSight(p.parent->i, p.parent->j, c.i, c.j, map, options)) {
-        c.g = p.parent->g + getHeuristic(c.i, c.j, p.i, p.j, options);
-        c.F = c.g + (options.hweight * c.H);
-        c.parent = p.parent;
-    }
+    c.g = p.parent->g + getHeuristic(c.i, c.j, p.i, p.j, options);
+    c.F = c.g + (options.hweight * c.H);
+    c.parent = p.parent;
     return c;
 }
 
