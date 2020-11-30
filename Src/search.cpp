@@ -55,7 +55,6 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
                 OPEN.erase(iter->i * map.getMapWidth() + iter->j);
                 OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
             }*/
-            if (CLOSED.find(iter->i * map.getMapWidth() + iter->j) == CLOSED.end()) continue;
             if (OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) {
                 iter->g = s.g + sqrt(((iter->i - s.i) * (iter->i - s.i)) + ((iter->j - s.j) * (iter->j - s.j)));
                 iter->parent = &s;
