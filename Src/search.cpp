@@ -47,9 +47,14 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
                 (!(options.breakingties) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))) {
 
                 iter->parent = &CLOSED.find(s.i * map.getMapWidth() + s.j)->second;
-                *iter = changeParent(*iter, *(iter->parent), map, options);
-                OPEN.erase(iter->i * map.getMapWidth() + iter->j);
-                OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
+                iter->g = iter->parent->g + 
+                    sqrt(((iter->i - iter->parent->i) * (iter->i - iter->parent->i)) +
+                    ((iter->j - iter->parent->j) * (iter->j - iter->parent->j)));
+                iter->H = getHeuristic(iter->i, iter->j, map, options);
+                iter->F = iter->g + (options.hweight) * iter->H;
+                if (OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) {
+                    OPEN.insert({ iter->i * map.getMapWidth() + iter->j, *iter });
+                }
             }
         }
 
@@ -159,17 +164,6 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
         }
     }
     return successors;
-}
-
-Node Search::changeParent(Node c, Node p, const Map& map, const EnvironmentOptions& options) {
-    if (options.searchtype != CN_SP_ST_TH) return c;
-
-    if ((p.parent == nullptr) || ((c.i == p.parent->i) && (c.j == p.parent->j))) return c;
-
-    c.g = p.parent->g + getHeuristic(c.i, c.j, p.i, p.j, options);
-    c.F = c.g + (options.hweight * c.H);
-    c.parent = p.parent;
-    return c;
 }
 
 void Search::makePrimaryPath(Node currentNode) {
