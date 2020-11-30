@@ -41,21 +41,33 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
         //1) Node not in OPEN
         //2) Node cost is inappropriate
         for (auto iter = successors.begin(); iter != successors.end(); ++iter) {
-            if ((OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) ||
+            /*if ((OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) ||
                 (iter->F <= OPEN[iter->i * map.getMapWidth() + iter->j].F) &&
                 (((options.breakingties) && (iter->g >= OPEN[iter->i * map.getMapWidth() + iter->j].g)) ||
                 (!(options.breakingties) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))) {
 
-                iter->parent = &CLOSED.find(s.i * map.getMapWidth() + s.j)->second;
+                iter->parent = &s;
                 iter->g = iter->parent->g + 
                     sqrt(((iter->i - iter->parent->i) * (iter->i - iter->parent->i)) +
                     ((iter->j - iter->parent->j) * (iter->j - iter->parent->j)));
                 iter->H = getHeuristic(iter->i, iter->j, map, options);
                 iter->F = iter->g + (options.hweight) * iter->H;
-                if (OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) {
-                    OPEN.insert({ iter->i * map.getMapWidth() + iter->j, *iter });
-                }
+                OPEN.erase(iter->i * map.getMapWidth() + iter->j);
+                OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
+            }*/
+            if (CLOSED.find(iter->i * map.getMapWidth() + iter->j) == CLOSED.end()) continue;
+            if (OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) {
+                iter->g = s.g + sqrt(((iter->i - s.i) * (iter->i - s.i)) + ((iter->j - s.j) * (iter->j - s.j)));
+                iter->parent = &s;
+                iter->H = getHeuristic(iter->i, iter->j, map, options);
+                iter->F = iter->g + options.hweight * iter->H;
+                OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
             }
+            else {
+                iter->g = std::min(iter->g, s.g + sqrt(((iter->i - s.i) * (iter->i - s.i)) + ((iter->j - s.j) * (iter->j - s.j))));
+                if (iter->g == s.g + sqrt(((iter->i - s.i) * (iter->i - s.i)) + ((iter->j - s.j) * (iter->j - s.j)))) iter->parent = &s;
+            }
+
         }
 
         Logger->writeToLogOpenClose(OPEN, CLOSED, false);
