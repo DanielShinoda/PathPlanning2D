@@ -156,6 +156,7 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
                     successor.F = successor.g + successor.H * options.hweight;
                     successors.push_front(successor);
                 }
+            }
         }
     }
     return successors;
