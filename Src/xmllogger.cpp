@@ -1,4 +1,4 @@
-#include "xmllogger.h"
+﻿#include "xmllogger.h"
 #include <iostream>
 
 using tinyxml2::XMLElement;
@@ -108,9 +108,13 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
 
         for (int j = 0; j < map.getMapWidth(); ++j) {
             inPath = false;
+            auto prev = path.begin();
+            auto curr = path.begin();
             for (auto it = path.begin(); it != path.end(); it++)
                 if (it->i == i && it->j == j) {
                     inPath = true;
+                    prev = curr;
+                    curr = it;
                     break;
                 }
             if (!inPath)
@@ -119,8 +123,16 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
                 str += "S";
             else if (inPath && (i == map.getGoalI() && j == map.getGoalJ()))
                 str += "F";
-            else
-                str += CNS_OTHER_PATHSELECTION;
+            else {
+                if (prev->i == curr->i && prev->j == curr->j - 1) str += "⬆";
+                if (prev->i == curr->i && prev->j == curr->j + 1) str += "⬇";
+                if (prev->i == curr->i - 1 && prev->j == curr->j + 1) str += "↖";
+                if (prev->i == curr->i + 1 && prev->j == curr->j + 1) str += "↗";
+                if (prev->i == curr->i - 1 && prev->j == curr->j) str += "⬅";
+                if (prev->i == curr->i + 1 && prev->j == curr->j) str += "➡";
+                if (prev->i == curr->i - 1 && prev->j == curr->j - 1) str += "↙";
+                if (prev->i == curr->i + 1 && prev->j == curr->j - 1) str += "↘";
+            }
             str += CNS_OTHER_MATRIXSEPARATOR;
         }
 
