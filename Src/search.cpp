@@ -42,16 +42,12 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
         //2) Node cost is inappropriate
         for (auto iter = successors.begin(); iter != successors.end(); ++iter) {
             if ((OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) ||
-                (iter->F <= OPEN[iter->i * map.getMapWidth() + iter->j].F) &&
+                ((iter->F <= OPEN[iter->i * map.getMapWidth() + iter->j].F) ||
+                ((iter->F == OPEN[iter->i * map.getMapWidth() + iter->j].F) &&
                 (((options.breakingties) && (iter->g >= OPEN[iter->i * map.getMapWidth() + iter->j].g)) ||
-                (!(options.breakingties) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))) {
+                ((!(options.breakingties)) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))))) {
 
-                iter->parent = &s;
-                iter->g = iter->parent->g + 
-                    sqrt(((iter->i - iter->parent->i) * (iter->i - iter->parent->i)) +
-                    ((iter->j - iter->parent->j) * (iter->j - iter->parent->j)));
-                iter->H = getHeuristic(iter->i, iter->j, map, options);
-                iter->F = iter->g + (options.hweight) * iter->H;
+                iter->parent = &(CLOSED.find(s.i * map.getMapWidth() + s.j)->second);
                 OPEN.erase(iter->i * map.getMapWidth() + iter->j);
                 OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
             }
@@ -60,7 +56,7 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
         Logger->writeToLogOpenClose(OPEN, CLOSED, false);
 
     }
-    Logger->writeToLogOpenClose(OPEN, CLOSED, false);
+    Logger->writeToLogOpenClose(OPEN, CLOSED, true);
 
     if (pathFound) {
         sresult.pathlength = s.g;
@@ -68,7 +64,7 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
     }
 
     finish = std::chrono::system_clock::now();
-    sresult.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count()) / 1000000000;
+    sresult.time = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count()) / 1000000000;
 
     if (pathFound) makeSecondaryPath();
 
@@ -134,7 +130,7 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
     for (int down = -1; down < 2; ++down) {
         for (int right = -1; right < 2; ++right) {
             noWay = false;
-            if (right && down) {
+            if ((right != 0) && (down != 0)) {
                 if (map.CellOnGrid(s.i + down, s.j + right) &&
                     map.CellIsTraversable(s.i + down, s.j + right)) {
                     if ((down != 0) && (right != 0)) {
@@ -184,13 +180,10 @@ void Search::makeSecondaryPath()
     while (it != --lppath.end()) {
         currentNode_i = it->i;
         currentNode_j = it->j;
-
         ++it;
         nextNode_i = it->i;
         nextNode_j = it->j;
-
         ++it;
-
         if (((it->i - nextNode_i) != (nextNode_i - currentNode_i)) || ((it->j - nextNode_j) != (nextNode_j - currentNode_j))) {
             hppath.push_back(*(--it));
         }
