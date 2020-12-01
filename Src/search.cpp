@@ -1,4 +1,5 @@
 #include "search.h"
+#include <chrono>
 
 
 Search::Search()
@@ -64,7 +65,7 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
     }
 
     finish = std::chrono::system_clock::now();
-    sresult.time = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count()) / 1000000000;
+    sresult.time = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count());
 
     if (pathFound) makeSecondaryPath();
 
