@@ -105,16 +105,11 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
     for (int i = 0; i < map.getMapHeight(); ++i) {
         XMLElement* element = doc.NewElement(CNS_TAG_ROW);
         element->SetAttribute(CNS_TAG_ATTR_NUM, iterate);
-
-        auto prev = path.begin();
-        auto curr = path.begin();
         for (int j = 0; j < map.getMapWidth(); ++j) {
             inPath = false;
             for (auto it = path.begin(); it != path.end(); it++)
                 if (it->i == i && it->j == j) {
                     inPath = true;
-                    prev = curr;
-                    curr = it;
                     break;
                 }
             if (!inPath)
@@ -124,14 +119,7 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
             else if (inPath && (i == map.getGoalI() && j == map.getGoalJ()))
                 str += "F";
             else {
-                if (prev->j == curr->j && prev->i == curr->i - 1) str += "⬇";
-                if (prev->j == curr->j && prev->i == curr->i + 1) str += "⬆";
-                if (prev->j == curr->j - 1 && prev->i == curr->i + 1) str += "↗";
-                if (prev->j == curr->j + 1 && prev->i == curr->i + 1) str += "↖";
-                if (prev->j == curr->j - 1 && prev->i == curr->i) str += "➡";
-                if (prev->j == curr->j + 1 && prev->i == curr->i) str += "⬅";
-                if (prev->j == curr->j - 1 && prev->i == curr->i - 1) str += "↘";
-                if (prev->j == curr->j + 1 && prev->i == curr->i - 1) str += "↙";
+                str += "*";
             }
             str += CNS_OTHER_MATRIXSEPARATOR;
         }
