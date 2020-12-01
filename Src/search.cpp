@@ -149,16 +149,16 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
                             (map.CellIsObstacle(s.i, s.j + horizontal)) &&
                             (!(options.cutcorners))) noWay = true;
                     }
-                }
-                //If there is a way and node not in CLOSED
-                if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
-                    successor.i = s.i + vertical;
-                    successor.j = s.j + horizontal;
-                    if ((vertical != 0) && (horizontal != 0)) successor.g = s.g + sqrt(2);
-                    else successor.g = s.g + 1;
-                    successor.H = getHeuristic(successor.i, successor.j, map, options);
-                    successor.F = successor.g + successor.H * options.hweight;
-                    successors.push_front(successor);
+                    //If there is a way and node not in CLOSED
+                    if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
+                        successor.i = s.i + vertical;
+                        successor.j = s.j + horizontal;
+                        if ((vertical != 0) && (horizontal != 0)) successor.g = s.g + sqrt(2);
+                        else successor.g = s.g + 1;
+                        successor.H = getHeuristic(successor.i, successor.j, map, options);
+                        successor.F = successor.g + successor.H * options.hweight;
+                        successors.push_front(successor);
+                    }
                 }
             }
         }
