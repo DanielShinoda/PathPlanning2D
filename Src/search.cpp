@@ -137,7 +137,7 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
                     if ((vertical != 0) && (horizontal != 0)) {
                         if ((map.CellIsObstacle(s.i + vertical, s.j) &&
                             map.CellIsObstacle(s.i, s.j + horizontal) &&
-                            !(options.allowsqueeze)) && !map.CellIsObstacle(s.i + vertical, s.j + horizontal)) noWay = true;
+                            !(options.allowsqueeze))) noWay = true;
                     }
 
                     if (!options.allowdiagonal) noWay = true;
