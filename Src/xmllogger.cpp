@@ -122,7 +122,6 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
             else
                 str += CNS_OTHER_PATHSELECTION;
             str += CNS_OTHER_MATRIXSEPARATOR;
-            str += CNS_OTHER_PATHSELECTION;
         }
 
         element->InsertEndChild(doc.NewText(str.c_str()));

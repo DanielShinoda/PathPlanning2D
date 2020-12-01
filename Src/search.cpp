@@ -43,7 +43,7 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
         //2) Node cost is inappropriate
         for (auto iter = successors.begin(); iter != successors.end(); ++iter) {
             if ((OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) ||
-                ((iter->F <= OPEN[iter->i * map.getMapWidth() + iter->j].F) ||
+                ((iter->F < OPEN[iter->i * map.getMapWidth() + iter->j].F) ||
                 ((iter->F == OPEN[iter->i * map.getMapWidth() + iter->j].F) &&
                 (((options.breakingties) && (iter->g >= OPEN[iter->i * map.getMapWidth() + iter->j].g)) ||
                 ((!(options.breakingties)) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))))) {
@@ -128,30 +128,30 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
     std::list<Node> successors;
     Node successor;
     bool noWay;
-    for (int down = -1; down < 2; ++down) {
-        for (int right = -1; right < 2; ++right) {
+    for (int vertical = -1; vertical < 2; ++vertical) {
+        for (int horizontal = -1; horizontal < 2; ++horizontal) {
             noWay = false;
-            if ((right != 0) && (down != 0)) {
-                if (map.CellOnGrid(s.i + down, s.j + right) &&
-                    map.CellIsTraversable(s.i + down, s.j + right)) {
-                    if ((down != 0) && (right != 0)) {
-                        if ((map.CellIsObstacle(s.i + down, s.j) &&
-                            map.CellIsObstacle(s.i, s.j + right) &&
+            if ((horizontal != 0) || (vertical != 0)) {
+                if (map.CellOnGrid(s.i + vertical, s.j + horizontal) &&
+                    map.CellIsTraversable(s.i + vertical, s.j + horizontal)) {
+                    if ((vertical != 0) && (horizontal != 0)) {
+                        if ((map.CellIsObstacle(s.i + vertical, s.j) &&
+                            map.CellIsObstacle(s.i, s.j + horizontal) &&
                             !(options.allowsqueeze))) noWay = true;
                     }
 
                     if (!options.allowdiagonal) noWay = true;
 
-                    if ((map.CellIsObstacle(s.i + down, s.j)) ||
-                        (map.CellIsObstacle(s.i, s.j + right)) &&
+                    if ((map.CellIsObstacle(s.i + vertical, s.j)) ||
+                        (map.CellIsObstacle(s.i, s.j + horizontal)) &&
                         !(options.cutcorners)) noWay = true;
                 }
             }
             //If there is a way and node not in CLOSED
-            if ((!noWay) && (CLOSED.find((s.i + down) * map.getMapWidth() + (s.j + right)) == CLOSED.end())) {
-                successor.i = s.i + down;
-                successor.j = s.j + right;
-                if ((down != 0) && (right != 0)) successor.g = s.g + sqrt(2);
+            if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
+                successor.i = s.i + vertical;
+                successor.j = s.j + horizontal;
+                if ((vertical != 0) && (horizontal != 0)) successor.g = s.g + sqrt(2);
                 else successor.g = s.g + 1;
                 successor.H = getHeuristic(successor.i, successor.j, map, options);
                 successor.F = successor.g + successor.H * options.hweight;
