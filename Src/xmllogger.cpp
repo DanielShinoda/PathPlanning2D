@@ -124,14 +124,14 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
             else if (inPath && (i == map.getGoalI() && j == map.getGoalJ()))
                 str += "F";
             else {
-                if (prev->i == curr->i && prev->j == curr->j - 1) str += "⬆";
-                if (prev->i == curr->i && prev->j == curr->j + 1) str += "⬇";
-                if (prev->i == curr->i - 1 && prev->j == curr->j + 1) str += "↖";
-                if (prev->i == curr->i + 1 && prev->j == curr->j + 1) str += "↗";
-                if (prev->i == curr->i - 1 && prev->j == curr->j) str += "⬅";
-                if (prev->i == curr->i + 1 && prev->j == curr->j) str += "➡";
-                if (prev->i == curr->i - 1 && prev->j == curr->j - 1) str += "↙";
-                if (prev->i == curr->i + 1 && prev->j == curr->j - 1) str += "↘";
+                if (prev->j == curr->j && prev->i == curr->i - 1) str += "⬇";
+                if (prev->j == curr->j && prev->i == curr->i + 1) str += "⬆";
+                if (prev->j == curr->j - 1 && prev->i == curr->i + 1) str += "↗";
+                if (prev->j == curr->j + 1 && prev->i == curr->i + 1) str += "↖";
+                if (prev->j == curr->j - 1 && prev->i == curr->i) str += "➡";
+                if (prev->j == curr->j + 1 && prev->i == curr->i) str += "⬅";
+                if (prev->j == curr->j - 1 && prev->i == curr->i - 1) str += "↘";
+                if (prev->j == curr->j + 1 && prev->i == curr->i - 1) str += "↙";
             }
             str += CNS_OTHER_MATRIXSEPARATOR;
         }
