@@ -114,13 +114,8 @@ void XmlLogger::writeToLogMap(const Map& map, const std::list<Node>& path)
                 }
             if (!inPath)
                 str += std::to_string(map.getValue(i, j));
-            else if (inPath && (i == map.getStartI() && j == map.getStartJ()))
-                str += "S";
-            else if (inPath && (i == map.getGoalI() && j == map.getGoalJ()))
-                str += "F";
-            else {
+            else
                 str += "*";
-            }
             str += CNS_OTHER_MATRIXSEPARATOR;
         }
 
