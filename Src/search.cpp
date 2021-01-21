@@ -132,37 +132,34 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
         for (int horizontal = -1; horizontal < 2; ++horizontal) {
             noWay = false;
 
-            if ((horizontal != 0) || (vertical != 0)) {
+            if (map.CellOnGrid(s.i + vertical, s.j + horizontal) &&
+                map.CellIsTraversable(s.i + vertical, s.j + horizontal)) {
 
-                if (map.CellOnGrid(s.i + vertical, s.j + horizontal) &&
-                    map.CellIsTraversable(s.i + vertical, s.j + horizontal)) {
+                if ((vertical != 0) && (horizontal != 0)) {
 
-                    if ((vertical != 0) && (horizontal != 0)) {
+                    if (map.CellIsObstacle(s.i + vertical, s.j) &&
+                        map.CellIsObstacle(s.i, s.j + horizontal) &&
+                        (!(options.allowsqueeze))) noWay = true;
 
-                        if (map.CellIsObstacle(s.i + vertical, s.j) &&
-                            map.CellIsObstacle(s.i, s.j + horizontal) &&
-                            (!(options.allowsqueeze))) noWay = true;
+                    if (!options.allowdiagonal) noWay = true;
 
-                        if (!options.allowdiagonal) noWay = true;
-
-                        if ((map.CellIsObstacle(s.i + vertical, s.j)) ||
-                            (map.CellIsObstacle(s.i, s.j + horizontal)) &&
-                            (!(options.cutcorners))) noWay = true;
-                    }
-                    //If there is a way and node not in CLOSED
-                    if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
-                        successor.i = s.i + vertical;
-                        successor.j = s.j + horizontal;
-                        if ((vertical != 0) && (horizontal != 0)) successor.g = s.g + sqrt(2);
-                        else successor.g = s.g + 1;
-                        successor.H = getHeuristic(successor.i, successor.j, map, options);
-                        successor.F = successor.g + successor.H * options.hweight;
-                        successors.push_front(successor);
-                    }
+                    if ((map.CellIsObstacle(s.i + vertical, s.j)) ||
+                        (map.CellIsObstacle(s.i, s.j + horizontal)) &&
+                        (!(options.cutcorners))) noWay = true;
+                }
+                //If there is a way and node not in CLOSED
+                if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
+                    successor.i = s.i + vertical;
+                    successor.j = s.j + horizontal;
+                    if ((vertical != 0) && (horizontal != 0)) successor.g = s.g + sqrt(2);
+                    else successor.g = s.g + 1;
+                    successor.H = getHeuristic(successor.i, successor.j, map, options);
+                    successor.F = successor.g + successor.H * options.hweight;
+                    successors.push_front(successor);
                 }
             }
+            }
         }
-    }
     return successors;
 }
 
