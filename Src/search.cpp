@@ -12,7 +12,7 @@ Search::~Search() {}
 
 SearchResult Search::startSearch(ILogger* Logger, const Map& map, const EnvironmentOptions& options)
 {
-    auto start = std::chrono::steady_clock::now();
+    auto startTime = std::chrono::high_resolution_clock::now();
 
     Node s;
     s.i = map.getStartI();
@@ -64,7 +64,9 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
     }
 
 
-    sresult.time = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    auto endTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = endTime - startTime;
+    sresult.time = duration.count();
 
     if (pathFound) makeSecondaryPath();
 
