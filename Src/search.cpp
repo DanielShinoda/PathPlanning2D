@@ -12,8 +12,7 @@ Search::~Search() {}
 
 SearchResult Search::startSearch(ILogger* Logger, const Map& map, const EnvironmentOptions& options)
 {
-    std::chrono::time_point<std::chrono::system_clock> start, finish;
-    start = std::chrono::system_clock::now();
+    auto start = std::chrono::steady_clock::now();
 
     Node s;
     s.i = map.getStartI();
@@ -64,8 +63,8 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
         makePrimaryPath(s);
     }
 
-    finish = std::chrono::system_clock::now();
-    sresult.time = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count());
+
+    sresult.time = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
 
     if (pathFound) makeSecondaryPath();
 
@@ -132,20 +131,19 @@ std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentO
         for (int horizontal = -1; horizontal < 2; ++horizontal) {
             noWay = false;
 
-            if (map.CellOnGrid(s.i + vertical, s.j + horizontal) &&
-                map.CellIsTraversable(s.i + vertical, s.j + horizontal)) {
+            if (map.CellIsCorrect(s.i + vertical, s.j + horizontal)) {
 
                 if ((vertical != 0) && (horizontal != 0)) {
 
-                    if (map.CellIsObstacle(s.i + vertical, s.j) &&
-                        map.CellIsObstacle(s.i, s.j + horizontal) &&
-                        (!(options.allowsqueeze))) noWay = true;
-
-                    if (!options.allowdiagonal) noWay = true;
-
-                    if ((map.CellIsObstacle(s.i + vertical, s.j)) ||
-                        (map.CellIsObstacle(s.i, s.j + horizontal)) &&
-                        (!(options.cutcorners))) noWay = true;
+                    if (options.allowdiagonal) {
+                        bool diag1 = map.CellIsCorrect(s.i, s.j + horizontal), diag2 = map.CellIsCorrect(s.i + vertical, s.j);
+                        if ((options.cutcorners && ((!diag1 && !diag2 && options.allowsqueeze) ||
+                            (diag1 && !diag2) || (!diag1 && diag2) || (diag1 && diag2)))) {
+                            noWay = false;
+                        } else {
+                            noWay = true;
+                        }
+                    }
                 }
                 //If there is a way and node not in CLOSED
                 if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
