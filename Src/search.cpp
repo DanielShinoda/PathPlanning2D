@@ -12,7 +12,7 @@ Search::~Search() {}
 
 SearchResult Search::startSearch(ILogger* Logger, const Map& map, const EnvironmentOptions& options)
 {
-    auto startTime = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::steady_clock::now();
 
     Node s;
     s.i = map.getStartI();
@@ -58,21 +58,19 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
     }
     Logger->writeToLogOpenClose(OPEN, CLOSED, true);
 
+    sresult.pathfound = pathFound;
+    sresult.nodescreated = CLOSED.size() + OPEN.size();
+    sresult.numberofsteps = CLOSED.size();
+
     if (pathFound) {
         sresult.pathlength = s.g;
         makePrimaryPath(s);
     }
 
 
-    auto endTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = endTime - startTime;
-    sresult.time = duration.count();
+    sresult.time = std::chrono::duration<double>(std::chrono::steady_clock::now() - time).count();
 
     if (pathFound) makeSecondaryPath();
-
-    sresult.pathfound = pathFound;
-    sresult.nodescreated = CLOSED.size() + OPEN.size();
-    sresult.numberofsteps = CLOSED.size();
 
     sresult.hppath = &hppath;
     sresult.lppath = &lppath;
