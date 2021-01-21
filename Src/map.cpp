@@ -22,18 +22,21 @@ Map::~Map()
     }
 }
 
-bool Map::CellIsTraversable(int i, int j) const
-{
+bool Map::CellIsCorrect(int i, int j) const {
+    bool onGrid = (i < height && i >= 0 && j < width && j >= 0);
+    bool traversable = (Grid[i][j] == CN_GC_NOOBS);
+    return (onGrid && traversable);
+}
+
+bool Map::CellIsTraversable(int i, int j) const {
     return (Grid[i][j] == CN_GC_NOOBS);
 }
 
-bool Map::CellIsObstacle(int i, int j) const
-{
+bool Map::CellIsObstacle(int i, int j) const {
     return (Grid[i][j] != CN_GC_NOOBS);
 }
 
-bool Map::CellOnGrid(int i, int j) const
-{
+bool Map::CellOnGrid(int i, int j) const {
     return (i < height && i >= 0 && j < width && j >= 0);
 }
 
@@ -311,8 +314,7 @@ bool Map::getMap(const char *FileName)
     return true;
 }
 
-int Map::getValue(int i, int j) const
-{
+int Map::getValue(int i, int j) const {
     if (i < 0 || i >= height)
         return -1;
 
@@ -322,37 +324,30 @@ int Map::getValue(int i, int j) const
     return Grid[i][j];
 }
 
-int Map::getMapHeight() const
-{
+int Map::getMapHeight() const {
     return height;
 }
 
-int Map::getMapWidth() const
-{
+int Map::getMapWidth() const {
     return width;
 }
 
-double Map::getCellSize() const
-{
+double Map::getCellSize() const {
     return cellSize;
 }
 
-int Map::getStartI() const
-{
+int Map::getStartI() const {
     return start_i;
 }
 
-int Map::getStartJ() const
-{
+int Map::getStartJ() const {
     return start_j;
 }
 
-int Map::getGoalI() const
-{
+int Map::getGoalI() const {
     return goal_i;
 }
 
-int Map::getGoalJ() const
-{
+int Map::getGoalJ() const {
     return goal_j;
 }
