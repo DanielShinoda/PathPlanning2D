@@ -48,6 +48,9 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
                 ((!(options.breakingties)) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))))) {
 
                 iter->parent = &(CLOSED.find(s.i * map.getMapWidth() + s.j)->second);
+                iter->g = iter->g + distance_between_neighbour_nodes(*iter, *(iter->parent));
+                iter->H = getHeuristic(iter->i, iter->j, map, options);
+                iter->F = iter->g + iter->H * options.hweight;
                 OPEN.erase(iter->i * map.getMapWidth() + iter->j);
                 OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
             }
@@ -77,6 +80,16 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
 
     return sresult;
 }
+
+double distance_between_neighbour_nodes(Node one, Node two) {
+    if (abs(one.i - two.i) + abs(one.j - two.j) == 2) return 1;
+    return sqrt(2);
+}
+/*
+(x, y), (x +- 1, y +- 1) - sqrt(2)
+(x, y), (x +- 1, y), (x, y +- 1) - 1
+*/
+
 
 double Search::getHeuristic(int x1, int y1, int x2, int y2, const EnvironmentOptions& options) {
     double dx(abs(x1 - x2)), dy(abs(y1 - y2));
