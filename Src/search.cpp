@@ -48,9 +48,6 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
                 ((!(options.breakingties)) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))))) {
 
                 iter->parent = &(CLOSED.find(s.i * map.getMapWidth() + s.j)->second);
-                iter->g = iter->g + distance_between_neighbour_nodes(*iter, *(iter->parent));
-                iter->H = getHeuristic(iter->i, iter->j, map, options);
-                iter->F = iter->g + iter->H * options.hweight;
                 OPEN.erase(iter->i * map.getMapWidth() + iter->j);
                 OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });
             }
@@ -80,15 +77,6 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
 
     return sresult;
 }
-
-double distance_between_neighbour_nodes(Node one, Node two) {
-    if (abs(one.i - two.i) + abs(one.j - two.j) == 2) return 1;
-    return sqrt(2);
-}
-/*
-(x, y), (x +- 1, y +- 1) - sqrt(2)
-(x, y), (x +- 1, y), (x, y +- 1) - 1
-*/
 
 
 double Search::getHeuristic(int x1, int y1, int x2, int y2, const EnvironmentOptions& options) {
@@ -128,8 +116,10 @@ Node Search::argmin(const EnvironmentOptions& options) {
         if (cur.F < minNode.F) {
             minNode = cur;
         } else if (cur.F == minNode.F) {
-            if (cur.g <= minNode.g) {
-                minNode = cur;
+            if (options.breakingties) {
+                if (cur.g >= minNode.g) minNode = cur;
+            } else {
+                if (cur.g <= minNode.g) minNode = cur;
             }
         }
     }
@@ -137,41 +127,56 @@ Node Search::argmin(const EnvironmentOptions& options) {
 }
 
 std::list<Node> Search::getSuccessors(Node s, const Map& map, const EnvironmentOptions& options) {
-    std::list<Node> successors;
-    Node successor;
+    std::list<Node> neighbors;
+    Node neighbor;
     bool noWay;
-    for (int vertical = -1; vertical < 2; ++vertical) {
-        for (int horizontal = -1; horizontal < 2; ++horizontal) {
+
+    for (int down = -1; down < 2; ++down) {
+        for (int right = -1; right < 2; ++right) {
             noWay = false;
 
-            if (map.CellIsCorrect(s.i + vertical, s.j + horizontal)) {
+            if ((down != 0) || (right != 0)) {
 
-                if ((vertical != 0) && (horizontal != 0)) {
+                if (map.CellOnGrid(s.i + down, s.j + right) &&
+                    map.CellIsTraversable(s.i + down, s.j + right)) {
+                    if ((down != 0) && (right != 0)) {
+                        if ((map.CellIsObstacle(s.i + down, s.j)) &&
+                            (map.CellIsObstacle(s.i, s.j + right)) &&
+                            (!(options.allowsqueeze))) {
+                            noWay = true;
+                        }
 
-                    if (options.allowdiagonal) {
-                        bool diag1 = map.CellIsCorrect(s.i, s.j + horizontal), diag2 = map.CellIsCorrect(s.i + vertical, s.j);
-                        if ((options.cutcorners && ((!diag1 && !diag2 && options.allowsqueeze) ||
-                            (diag1 && !diag2) || (!diag1 && diag2) || (diag1 && diag2)))) {
-                            noWay = false;
-                        } else {
+                        if (!(options.allowdiagonal)) {
+                            noWay = true;
+                        }
+
+                        if (((map.CellIsObstacle(s.i + down, s.j)) ||
+                            (map.CellIsObstacle(s.i, s.j + right))) &&
+                            (!(options.cutcorners))) {
                             noWay = true;
                         }
                     }
+
+                    if ((!(noWay)) &&
+                        (CLOSED.find((s.i + down) * map.getMapWidth() + (s.j + right)) == CLOSED.end())) {
+                        neighbor.i = s.i + down;
+                        neighbor.j = s.j + right;
+                        if ((down != 0) && (right != 0)) {
+                            neighbor.g = s.g + sqrt(2);
+                        }
+                        else {
+                            neighbor.g = s.g + 1.0;
+                        }
+                        neighbor.H = getHeuristic(neighbor.i, neighbor.j, map.getGoalI(), map.getGoalJ(), options);
+                        neighbor.F = neighbor.g + (options.hweight * neighbor.H);
+
+                        neighbors.push_front(neighbor);
+                    }
                 }
-                //If there is a way and node not in CLOSED
-                if ((!noWay) && (CLOSED.find((s.i + vertical) * map.getMapWidth() + (s.j + horizontal)) == CLOSED.end())) {
-                    successor.i = s.i + vertical;
-                    successor.j = s.j + horizontal;
-                    if ((vertical != 0) && (horizontal != 0)) successor.g = s.g + sqrt(2);
-                    else successor.g = s.g + 1;
-                    successor.H = getHeuristic(successor.i, successor.j, map, options);
-                    successor.F = successor.g + successor.H * options.hweight;
-                    successors.push_front(successor);
-                }
-            }
             }
         }
-    return successors;
+    }
+    return neighbors;
 }
 
 void Search::makePrimaryPath(Node currentNode) {
