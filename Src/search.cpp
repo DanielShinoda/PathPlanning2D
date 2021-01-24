@@ -142,6 +142,7 @@ std::list<Node> Search::getSuccessors(const Node& s, const Map& map, const Envir
                         successors.push_front(successor);
                     }
                 }
+
             }
         }
     }
