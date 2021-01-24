@@ -20,8 +20,6 @@ public:
 
     void writeToLogMap(const Map &Map, const std::list<Node> &path);
 
-    void writeToLogOpenClose(const std::unordered_map<int, Node>&open, const std::unordered_map<int, Node> &close, bool last);
-
     void writeToLogPath(const std::list<Node> &path);
 
     void writeToLogHPpath(const std::list<Node> &hppath);
