@@ -91,7 +91,7 @@ cd ../../Bin/{Debug|Release}/
 ### Windows
 Release сборка:
 ```cmd
-cd PathPlanningProject
+cd PathPlanning2D
 cd Build
 cd Release
 set PATH
@@ -102,7 +102,7 @@ mingw32-make install
 
 Debug сборка:
 ```cmd
-cd PathPlanningProject
+cd PathPlanning2D
 cd Build
 cd Debug
 set PATH
