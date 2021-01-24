@@ -61,7 +61,7 @@ git clone https://github.com/*account*/PathPlanningProject.git
 ### Linux и Mac
 Release сборка:
 ```bash
-cd PathPlanningProject
+cd PathPlanning2D
 cd Build
 cd Release
 cmake ../../ -DCMAKE_BUILD_TYPE="Release"
@@ -71,7 +71,7 @@ make install
 
 Debug сборка:
 ```bash
-cd PathPlanningProject
+cd PathPlanning2D
 cd Build
 cd Debug
 cmake ../../ -DCMAKE_BUILD_TYPE="Debug"
@@ -82,7 +82,7 @@ make install
 Запуск:
 ```bash
 cd ../../Bin/{Debug|Release}/
-./PathPlanning ../../Examples/example.xml
+./Khaybulin_Daniel_ASearch ../../Examples/example.xml
 ```
 Результат запуска:
 
@@ -114,7 +114,7 @@ mingw32-make install
 Запуск:
 ```cmd
 cd ../../Bin/{Debug|Release}/
-PathPlanning.exe ../../Examples/example.xml
+Khaybulin_Daniel_ASearch.exe ../../Examples/example.xml
 ```
 
 Результат запуска:
