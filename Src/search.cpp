@@ -41,12 +41,18 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
         //1) Node not in OPEN
         //2) Node cost is inappropriate
         for (auto iter = successors.begin(); iter != successors.end(); ++iter) {
-            if ((OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) ||
-                ((iter->F < OPEN[iter->i * map.getMapWidth() + iter->j].F) ||
-                ((iter->F == OPEN[iter->i * map.getMapWidth() + iter->j].F) &&
-                (((options.breakingties) && (iter->g >= OPEN[iter->i * map.getMapWidth() + iter->j].g)) ||
-                ((!(options.breakingties)) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)))))) {
+            // if successor not in OPEN
+            bool change = 0;
+            if (OPEN.find(iter->i * map.getMapWidth() + iter->j) == OPEN.end()) change = 1;
 
+            if (iter->F < OPEN[iter->i * map.getMapWidth() + iter->j].F) change = 1;
+
+            if (iter->F == OPEN[iter->i * map.getMapWidth() + iter->j].F) {
+                if ((options.breakingties) && (iter->g >= OPEN[iter->i * map.getMapWidth() + iter->j].g)) change = 1;
+                if (!(options.breakingties) && (iter->g <= OPEN[iter->i * map.getMapWidth() + iter->j].g)) change = 1;
+            }
+
+            if (change) {
                 iter->parent = &(CLOSED.find(s.i * map.getMapWidth() + s.j)->second);
                 OPEN.erase(iter->i * map.getMapWidth() + iter->j);
                 OPEN.insert({ iter->i * map.getMapWidth() + iter->j , *iter });

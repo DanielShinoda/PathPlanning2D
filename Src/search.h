@@ -31,7 +31,6 @@ class Search
         virtual std::list<Node> getSuccessors(Node s, const Map& map, const EnvironmentOptions& options);
         virtual void makePrimaryPath(Node currentNode);
         virtual void makeSecondaryPath();
-        virtual double distance_between_neighbour_nodes(Node one, Node two);
         SearchResult sresult; //This will store the search result
         std::list<Node> lppath, hppath; //
         
