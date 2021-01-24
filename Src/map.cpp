@@ -23,9 +23,7 @@ Map::~Map()
 }
 
 bool Map::CellIsCorrect(int i, int j) const {
-    bool onGrid = (i < height && i >= 0 && j < width && j >= 0);
-    bool traversable = (Grid[i][j] == CN_GC_NOOBS);
-    return (onGrid && traversable);
+    return ((i < height && i >= 0 && j < width && j >= 0) && (Grid[i][j] == CN_GC_NOOBS));
 }
 
 bool Map::CellIsTraversable(int i, int j) const {
