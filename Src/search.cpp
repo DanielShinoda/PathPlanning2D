@@ -9,8 +9,7 @@ Search::Search()
 Search::~Search() {}
 
 
-SearchResult Search::startSearch(ILogger* Logger, const Map& map, const EnvironmentOptions& options)
-{
+SearchResult Search::startSearch(ILogger* Logger, const Map& map, const EnvironmentOptions& options) {
     auto time = std::chrono::steady_clock::now();
 
     Node s;
@@ -40,9 +39,7 @@ SearchResult Search::startSearch(ILogger* Logger, const Map& map, const Environm
                 OPEN.insert({ iter.i * map.getMapWidth() + iter.j , iter });
             }
         }
-        Logger->writeToLogOpenClose(OPEN, CLOSED, 0);
     }
-    Logger->writeToLogOpenClose(OPEN, CLOSED, 1);
     sresult.pathfound = pathFound;
     sresult.nodescreated = CLOSED.size() + OPEN.size();
     sresult.numberofsteps = CLOSED.size();
